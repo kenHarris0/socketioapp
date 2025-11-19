@@ -1,8 +1,9 @@
 import User from "../models/User.js"
 import bcrypt from "bcryptjs"
 import { generateToken } from "../lib/utils.js"
-
-
+import {transporter} from '../emails/emailHandler.js'
+import {createWelcomeEmailTemplate} from '../emails/emailTemplate.js'
+import {ENV} from '../lib/env.js'
 
 
 export const signup=async(req,res)=>{
@@ -31,23 +32,34 @@ const newuser=new User({
 })
 if(newuser){
 generateToken(newuser._id,res);
+try{
+   let emailObj={
+    from:process.env.SMTP_MAIL,
+    to:newuser.email,
+    subject:"Welcome to chatapp",
+    html:createWelcomeEmailTemplate(newuser.fullName,ENV.CLIENT_URL)
+   }
+   transporter.sendMail(emailObj)
+   console.log("email sent")
+}
+catch(err){
+        console.log(err)
+       
+    }
 await  newuser.save()
- return res.status(201).json({
+ res.status(201).json({
     _id:newuser._id,
     fullName:newuser.fullName,
     email:newuser.email,
     profilePic:newuser.profilePic
  })
+
+
 }
 else{
      return res.status(400).json({message:"invalid userdata"})
 }
-
-
-       
-
-
-    }
+}
     catch(err){
         console.log(err)
         res.status(500).json({message:"internal server error"})
