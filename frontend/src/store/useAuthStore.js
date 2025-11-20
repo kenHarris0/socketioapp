@@ -69,6 +69,20 @@ toast.success("Logged out successfully")
             console.log("logout error:",err)
             toast.error(err.response.data.message)
         }
+    },
+    updateProfile:async(data)=>{
+        try{
+             const res=await axiosInstance.put('/auth/update-profile',data)
+             set({authUser:res.data})
+             toast.success("photo updated successfully")
+
+        }
+        catch(err){
+            console.log("logout error:",err)
+            toast.error(err.response.data.message)
+        }
+
+
     }
 
 }))
